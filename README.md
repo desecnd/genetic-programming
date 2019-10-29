@@ -3,8 +3,8 @@ Repository contains codes, programs, algorithms, that I have written in order to
 
 ## Sources: 
 ### Books: 
-Zbigniew Michalewicz - Genetic Algorithms + Data Structures = Evolution Programs
-David E. Goldberg - Genetic Algorihtms in Search, Optimization and Machine Learning
+* Zbigniew Michalewicz - Genetic Algorithms + Data Structures = Evolution Programs
+* David E. Goldberg - Genetic Algorihtms in Search, Optimization and Machine Learning
 ### Other:
-[TurtorialsPoint - Genetic Algorihtms Introduction](https://www.tutorialspoint.com/genetic_algorithms/genetic_algorithms_introduction.htm)
-[TechIO - Genetic Algorithms Guide](https://tech.io/playgrounds/334/genetic-algorithms/history)
+* [TurtorialsPoint - Genetic Algorihtms Introduction](https://www.tutorialspoint.com/genetic_algorithms/genetic_algorithms_introduction.htm)
+* [TechIO - Genetic Algorithms Guide](https://tech.io/playgrounds/334/genetic-algorithms/history)

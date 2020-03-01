@@ -10,7 +10,12 @@
 
 #include "geometry.h"
 
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+
 #include <iostream>
+#include <sstream>
+#include <chrono>
 #include <random>
 
 
@@ -23,13 +28,13 @@ using fitness_t = double;
 
 // MEMBERS 
 bool local = false;
-const size_t popSize = 20;
+const size_t popSize = 100;
 
-double clearParam { 0.5 };
-double wdi { 0.5 };
-double wsm { 1.5 };
-double wcl { 2.0 };
-fitness_t costBorder { 1000 };
+double clearParam { 100 };
+double wdi { 2 };
+double wsm { 0.5 };
+double wcl { 2 };
+fitness_t costBorder { 10000.0 };
 
 const int MAX_X = 1920; 
 const int MAX_Y = 1000;
@@ -42,11 +47,11 @@ std::uniform_int_distribution<int> yDistr;
 std::uniform_real_distribution<double> fraction;
 
 std::bernoulli_distribution crossRoll { 0.3 };
-std::bernoulli_distribution swapRoll { 0.1 };
-std::bernoulli_distribution insertRoll { 0.1 };
-std::bernoulli_distribution removeRoll { 0.1 };
-std::bernoulli_distribution smallMutateRoll { 0.1 };
-std::bernoulli_distribution largeMutateRoll { 0.1 };
+std::bernoulli_distribution swapRoll { 0.01 };
+std::bernoulli_distribution insertRoll { 0.05 };
+std::bernoulli_distribution removeRoll { 0.05 };
+std::bernoulli_distribution smallMutateRoll { 0.05 };
+std::bernoulli_distribution largeMutateRoll { 0.05 };
 std::bernoulli_distribution smootheRoll { 0.1 };
 std::bernoulli_distribution roll { 0.5 };
 
@@ -81,7 +86,9 @@ geo::Point dest;
     // Inline functions
     size_t nOfGen() { return populations.size(); }
     size_t getMaxChromLen() { return ( local? nOfGen() : obstacles.size() ); }
+public:
     geo::Point getRandomPoint() { return geo::Point(xDistr(rng), yDistr(rng)); }
+private:
 
     // COST METHODS
     fitness_t calcGoodCost(chrom_t& chrom);
@@ -113,15 +120,16 @@ geo::Point dest;
     void randomize(Population& pop);
     void calcStats(Population& pop);
     void print(Population& pop);
+    void draw(sf::RenderWindow& window, sf::Font& font, Population pop, int x);
 
-    Pathfinder(unsigned int n );
+    Pathfinder();
     Pathfinder(const Pathfinder& );
 
 public:
     std::vector<geo::Point> findBestPath(geo::Circle& queen, geo::Point destination, std::vector<geo::Circle>& sites, int nOfGenerations);
 
     static Pathfinder& getPathfinder() {
-        static Pathfinder pathfinder{44};
+        static Pathfinder pathfinder;
         return pathfinder;
     }
 };

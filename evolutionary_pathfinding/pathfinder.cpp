@@ -72,7 +72,10 @@ void Pathfinder::draw(Pathfinder::Population pop, int bestIndividualsPrintCnt, b
     reverse(pop.individuals.begin(), pop.individuals.end());
     for ( int i = 0; i < x; i++) {
         Individual& ind = pop.individuals[i];
-        if ( ind.valid ) ss << std::setw(3) << i + 1 << ":\t" << distance(ind.chrom) << "\t " << smooth(ind.chrom) << "\t" << clear(ind.chrom) << "\n";
+        if ( ind.valid ) { 
+            ss << std::setw(3) << i + 1 << ":\t" << distance(ind.chrom) << "\t " << smooth(ind.chrom) << "\t" << clear(ind.chrom);
+            ss << " -->\t" << wdi * distance(ind.chrom) << "\t " << wsm * smooth(ind.chrom) << "\t" << wcl * clear(ind.chrom) << "\n";
+        }
         else ss << std::setw(3) << i + 1 << ": INVALID\n";
     }
 
@@ -304,7 +307,7 @@ void Pathfinder::evaluate(Population& pop) {
             maxCost = std::max(ind.cost, maxCost);
         }
     } 
-    if ( maxCost < 0 )
+    // if ( maxCost < 0 )
     maxCost = costBorder - 1000;
 
     for ( Individual &ind : pop.individuals ) {

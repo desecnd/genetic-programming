@@ -38,10 +38,14 @@ bool local = false;
 const size_t popSize = 100;
 
 double clearParam { 1 };
-double wdi { 2 };
+// probably uniformed by straight line distance (100 / a->b) 100 is good cost or minus
+double wdi { 0.1 };
+// very small value, has to be multiplayed by strong factor, and probably by nomber of edges
 double wsm { 2000 };
-double wcl { 2 };
-fitness_t costBorder { 10000.0 };
+// ~ queen radius in dense enviroment, need to be multiplied by strong factor if gets throught point
+// -> more in local than in global
+double wcl { 50 };
+fitness_t costBorder { 100000.0 };
 
 const int MAX_X = 1920; 
 const int MAX_Y = 1000;
@@ -55,7 +59,7 @@ std::uniform_real_distribution<double> fraction;
 
 std::bernoulli_distribution crossRoll { 0.3 };
 std::bernoulli_distribution swapRoll { 0.01 };
-std::bernoulli_distribution insertRoll { 0.05 };
+std::bernoulli_distribution insertRoll { 0.1 };
 std::bernoulli_distribution removeRoll { 0.05 };
 std::bernoulli_distribution smallMutateRoll { 0.05 };
 std::bernoulli_distribution largeMutateRoll { 0.05 };

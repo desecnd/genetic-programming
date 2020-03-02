@@ -14,6 +14,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <chrono>
 #include <random>
@@ -36,7 +37,7 @@ using fitness_t = double;
 bool local = false;
 const size_t popSize = 100;
 
-double clearParam { 100 };
+double clearParam { 1 };
 double wdi { 2 };
 double wsm { 2000 };
 double wcl { 2 };

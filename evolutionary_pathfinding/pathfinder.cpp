@@ -3,7 +3,7 @@
 using namespace geo;
 
 Pathfinder::Pathfinder() 
-    : window(sf::VideoMode(1920, 1000), "Simulation"), view(sf::FloatRect(0.f, 0.f, 1920.f, 1000.f)), font(), 
+    : window(sf::VideoMode(1920, 1000), "Simulation", sf::Style::Fullscreen), view(sf::FloatRect(0.f, 0.f, 1920.f, 1000.f)), font(), 
         rng{std::chrono::high_resolution_clock::now().time_since_epoch().count()}, 
         xDistr{MIN_X, MAX_X}, yDistr{MIN_Y, MAX_Y}, fraction{0, 1} {
 
@@ -13,7 +13,9 @@ Pathfinder::Pathfinder()
 }
 
 void Pathfinder::draw(Pathfinder::Population pop, int bestIndividualsPrintCnt, bool pauseAfter = false) {
+    if ( !window.isOpen() ) return; 
     window.clear(sf::Color::Black); 
+
 
     for (Circle& c : obstacles) {
         sf::CircleShape site(c.r);
@@ -55,6 +57,7 @@ void Pathfinder::draw(Pathfinder::Population pop, int bestIndividualsPrintCnt, b
         } 
     }
 
+
     std::ostringstream ss;
     ss << "Gen: " << nOfGen() <<  ", Fitness Sum: " << pop.sum << ", Avg: " << pop.avg << ", Min: " << pop.min << ", Max: " << pop.max;
 
@@ -65,15 +68,34 @@ void Pathfinder::draw(Pathfinder::Population pop, int bestIndividualsPrintCnt, b
     text.setFillColor(sf::Color::White);
     window.draw(text);
 
-    window.display();
+    ss.str("");
+    reverse(pop.individuals.begin(), pop.individuals.end());
+    for ( int i = 0; i < x; i++) {
+        Individual& ind = pop.individuals[i];
+        if ( ind.valid ) ss << std::setw(3) << i + 1 << ":\t" << distance(ind.chrom) << "\t " << smooth(ind.chrom) << "\t" << clear(ind.chrom) << "\n";
+        else ss << std::setw(3) << i + 1 << ": INVALID\n";
+    }
 
+    sf::Text params;
+    params.setString(ss.str());
+    params.setCharacterSize(20);
+    params.setFont(font);
+    params.setFillColor(sf::Color::White);
+    params.setPosition(0.f, 50.f);
+    window.draw(params);
+
+    window.display();
     if ( pauseAfter == true ) {
         bool wait = true;
         while ( window.isOpen() && wait ) {
             sf::Event event;
             while ( window.pollEvent(event) ) {
                 if ( event.type == sf::Event::Closed ) window.close();
-                else if ( event.type == sf::Event::KeyPressed ) wait = false;
+                else if ( event.type == sf::Event::KeyPressed ) {
+                    if ( event.key.code == sf::Keyboard::Escape )
+                        window.close();
+                    wait = false;
+                }
             }
         }
     }
@@ -82,7 +104,7 @@ void Pathfinder::draw(Pathfinder::Population pop, int bestIndividualsPrintCnt, b
 void Pathfinder::test(Circle & queen, std::vector<Circle>& sites) {
     int nOfGenerations { 150 };
 
-    while ( 1 ) {
+    while ( window.isOpen() ) {
         Point dest { getRandomPoint() };
         std::vector<Point> path { findBestPath(queen, dest, sites, nOfGenerations) };
     }
@@ -203,20 +225,22 @@ double Pathfinder::smooth(chrom_t& chrom) {
 double Pathfinder::clear(chrom_t& chrom) {
     double maxC { 0.0 };
     for (int i = 0; i < chrom.size() - 1; i++) {
-
         Point a{chrom[i].first}, b{chrom[i + 1].first};
+        double minDist = std::numeric_limits<double>::max();
 
         for ( Circle& c : obstacles ) {
             Point p { c.o };
-            double cl { segPoint(a, b, p) - (c.r + robot.r) };
-
-            if ( cl < 0 ) cl *= -clearParam;
-
-            // CORNER CASE, DESTINY POINT IS IN OBSTACLE
-            if ( i == chrom.size() - 2 && abs(b - p) <= (c.r + robot.r)) cl = 0;
-
-            maxC = std::max(maxC, cl);
+            minDist = std::min(minDist, segPoint(a, b, p) - c.r);
         }
+
+        double cl { minDist - robot.r };
+        if ( cl < 0 ) cl *= -clearParam;
+
+        // CORNER CASE, DESTINY POINT IS IN OBSTACLE
+        if ( i == chrom.size() - 2 && minDist <= robot.r ) 
+            cl = 0;
+
+        maxC = std::max(maxC, cl);
     } 
 
     return maxC;

@@ -3,9 +3,16 @@
 using namespace geo;
 
 Pathfinder::Pathfinder() 
-    : rng{std::chrono::high_resolution_clock::now().time_since_epoch().count()}, xDistr{MIN_X, MAX_X}, yDistr{MIN_Y, MAX_Y}, fraction{0, 1} {}
+    : window(sf::VideoMode(1920, 1000), "Simulation"), view(sf::FloatRect(0.f, 0.f, 1920.f, 1000.f)), font(), 
+        rng{std::chrono::high_resolution_clock::now().time_since_epoch().count()}, 
+        xDistr{MIN_X, MAX_X}, yDistr{MIN_Y, MAX_Y}, fraction{0, 1} {
 
-void Pathfinder::draw(sf::RenderWindow& window, sf::Font& font, Pathfinder::Population pop, int x ) {
+    window.setView(view);
+    font.loadFromFile("Bebas-Regular.otf");
+    // window.setKeyRepeatEnabled(false);
+}
+
+void Pathfinder::draw(Pathfinder::Population pop, int bestIndividualsPrintCnt, bool pauseAfter = false) {
     window.clear(sf::Color::Black); 
 
     for (Circle& c : obstacles) {
@@ -29,6 +36,7 @@ void Pathfinder::draw(sf::RenderWindow& window, sf::Font& font, Pathfinder::Popu
     window.draw(dshape);
 
     sort(pop.individuals.begin(), pop.individuals.end());
+    int x = bestIndividualsPrintCnt;
     int s = pop.size - x;
     for (int i = s; i < pop.size; i++) {
         Individual &ind = pop.individuals[i]; 
@@ -48,8 +56,7 @@ void Pathfinder::draw(sf::RenderWindow& window, sf::Font& font, Pathfinder::Popu
     }
 
     std::ostringstream ss;
-    ss << "Fitness Sum: " << pop.sum << ", Avg: " << pop.avg << ", Min: " << pop.min << ", Max: " << pop.max;
-
+    ss << "Gen: " << nOfGen() <<  ", Fitness Sum: " << pop.sum << ", Avg: " << pop.avg << ", Min: " << pop.min << ", Max: " << pop.max;
 
     sf::Text text;
     text.setString(ss.str());
@@ -59,6 +66,26 @@ void Pathfinder::draw(sf::RenderWindow& window, sf::Font& font, Pathfinder::Popu
     window.draw(text);
 
     window.display();
+
+    if ( pauseAfter == true ) {
+        bool wait = true;
+        while ( window.isOpen() && wait ) {
+            sf::Event event;
+            while ( window.pollEvent(event) ) {
+                if ( event.type == sf::Event::Closed ) window.close();
+                else if ( event.type == sf::Event::KeyPressed ) wait = false;
+            }
+        }
+    }
+}
+
+void Pathfinder::test(Circle & queen, std::vector<Circle>& sites) {
+    int nOfGenerations { 150 };
+
+    while ( 1 ) {
+        Point dest { getRandomPoint() };
+        std::vector<Point> path { findBestPath(queen, dest, sites, nOfGenerations) };
+    }
 }
 
 std::vector<Point> Pathfinder::findBestPath(Circle& queen, Point destination, std::vector<Circle>& sites,  int nOfGenerations) {
@@ -67,12 +94,6 @@ std::vector<Point> Pathfinder::findBestPath(Circle& queen, Point destination, st
     obstacles = sites;
     nOfGenerations += nOfGen();
 
-    sf::RenderWindow window(sf::VideoMode(1920, 1000), "Simulation");
-    sf::View view(sf::FloatRect(0.f, 0.f, 1920.f, 1000.f));
-    window.setView(view);
-    sf::Font font;
-    font.loadFromFile("Bebas-Regular.otf");
-    // window.setKeyRepeatEnabled(false);
 
     if ( nOfGen() == 0 ) {
         populations.emplace_back(popSize);
@@ -87,28 +108,22 @@ std::vector<Point> Pathfinder::findBestPath(Circle& queen, Point destination, st
         evaluate(populations.back());
         calcStats(populations.back());
 
-        draw(window, font, populations.back(), popSize/2);
-        bool wait = true;
-        while ( window.isOpen() && wait ) {
-            sf::Event event;
-            while ( window.pollEvent(event) ) {
-                if ( event.type == sf::Event::Closed ) window.close();
-                else if ( event.type == sf::Event::KeyPressed ) wait = false;
-            }
-        }
+        draw(populations.back(), popSize/2);
     }
 
     Individual best { populations.back().getBest() };
     // print(populations.back());
 
-    draw(window, font, populations.back(), 3);
+    draw(populations.back(), 3, true);
 
+    /* 
     while ( window.isOpen() ) {
         sf::Event event;
         while ( window.pollEvent(event) ) {
             if ( event.type == sf::Event::Closed ) window.close();
         }
     }
+    */
 
     std::vector<Point> ans;
     for (auto p : best.chrom) 
@@ -265,8 +280,8 @@ void Pathfinder::evaluate(Population& pop) {
             maxCost = std::max(ind.cost, maxCost);
         }
     } 
-    std::cout << "MAXCOST: " << maxCost << std::endl;
-    maxCost = costBorder - 100;
+    if ( maxCost < 0 )
+    maxCost = costBorder - 1000;
 
     for ( Individual &ind : pop.individuals ) {
         if ( !ind.valid ) ind.cost = calcBadCost(ind.chrom, maxCost);

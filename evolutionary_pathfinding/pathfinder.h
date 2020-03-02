@@ -22,6 +22,12 @@
 class Pathfinder { 
 private:
 
+// DEBUG SFML
+sf::RenderWindow window;
+sf::View view;
+sf::Font font;
+
+
 // USED TYPES
 using chrom_t = std::vector<std::pair<geo::Point, bool>>;
 using fitness_t = double;
@@ -32,7 +38,7 @@ const size_t popSize = 100;
 
 double clearParam { 100 };
 double wdi { 2 };
-double wsm { 0.5 };
+double wsm { 2000 };
 double wcl { 2 };
 fitness_t costBorder { 10000.0 };
 
@@ -120,13 +126,15 @@ private:
     void randomize(Population& pop);
     void calcStats(Population& pop);
     void print(Population& pop);
-    void draw(sf::RenderWindow& window, sf::Font& font, Population pop, int x);
+    void draw(Population pop, int x, bool pauseAfter);
 
     Pathfinder();
     Pathfinder(const Pathfinder& );
 
 public:
     std::vector<geo::Point> findBestPath(geo::Circle& queen, geo::Point destination, std::vector<geo::Circle>& sites, int nOfGenerations);
+
+    void test(geo::Circle& queen, std::vector<geo::Circle>& sites);
 
     static Pathfinder& getPathfinder() {
         static Pathfinder pathfinder;

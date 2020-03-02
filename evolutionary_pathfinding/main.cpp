@@ -20,9 +20,8 @@ int main() {
     }
 
     Circle queen({417,750}, 30.0);
+    Pathfinder::getPathfinder().test(queen, sites);
 
-        Point dest { Pathfinder::getPathfinder().getRandomPoint() };
-        vector<Point> path { Pathfinder::getPathfinder().findBestPath(queen, dest, sites, 150) };
 
     return 0;
 }

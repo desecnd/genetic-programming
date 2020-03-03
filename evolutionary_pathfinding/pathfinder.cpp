@@ -59,7 +59,8 @@ void Pathfinder::draw(Pathfinder::Population pop, int bestIndividualsPrintCnt, b
 
 
     std::ostringstream ss;
-    ss << "Gen: " << nOfGen() <<  ", Fitness Sum: " << pop.sum << ", Avg: " << pop.avg << ", Min: " << pop.min << ", Max: " << pop.max;
+    ss << "Gen: " << nOfGen() <<  ", Fitness Sum: " << pop.sum << ", Avg: " << pop.avg << ", Min: " << pop.min << ", Max: " << pop.max << "\n";
+    ss << "Weights: " << "distance: " << wdi << ", smooth: " << wsm << ", clear: " << wcl << ", clear param: " << clearParam;
 
     sf::Text text;
     text.setString(ss.str());
@@ -84,7 +85,7 @@ void Pathfinder::draw(Pathfinder::Population pop, int bestIndividualsPrintCnt, b
     params.setCharacterSize(20);
     params.setFont(font);
     params.setFillColor(sf::Color::White);
-    params.setPosition(0.f, 50.f);
+    params.setPosition(0.f, 120.f);
     window.draw(params);
 
     window.display();
@@ -119,6 +120,7 @@ std::vector<Point> Pathfinder::findBestPath(Circle& queen, Point destination, st
     obstacles = sites;
     nOfGenerations += nOfGen();
 
+    wdi = 100 / abs(dest - robot.o);
 
     if ( nOfGen() == 0 ) {
         populations.emplace_back(popSize);
@@ -233,15 +235,14 @@ double Pathfinder::clear(chrom_t& chrom) {
 
         for ( Circle& c : obstacles ) {
             Point p { c.o };
+            // CORNER CASE, DESTINY POINT IS IN OBSTACLE
+            if ( abs(dest - p) <= (c.r + robot.r) ) continue;
+
             minDist = std::min(minDist, segPoint(a, b, p) - c.r);
         }
 
         double cl { minDist - robot.r };
         if ( cl < 0 ) cl *= -clearParam;
-
-        // CORNER CASE, DESTINY POINT IS IN OBSTACLE
-        if ( i == chrom.size() - 2 && minDist <= robot.r ) 
-            cl = 0;
 
         maxC = std::max(maxC, cl);
     } 

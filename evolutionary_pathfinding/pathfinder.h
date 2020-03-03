@@ -28,7 +28,6 @@ sf::RenderWindow window;
 sf::View view;
 sf::Font font;
 
-
 // USED TYPES
 using chrom_t = std::vector<std::pair<geo::Point, bool>>;
 using fitness_t = double;
@@ -37,14 +36,14 @@ using fitness_t = double;
 bool local = false;
 const size_t popSize = 100;
 
-double clearParam { 1 };
+double clearParam { 50 };
 // probably uniformed by straight line distance (100 / a->b) 100 is good cost or minus
 double wdi { 0.1 };
 // very small value, has to be multiplayed by strong factor, and probably by nomber of edges
 double wsm { 2000 };
 // ~ queen radius in dense enviroment, need to be multiplied by strong factor if gets throught point
 // -> more in local than in global
-double wcl { 50 };
+double wcl { 1 };
 fitness_t costBorder { 100000.0 };
 
 const int MAX_X = 1920; 

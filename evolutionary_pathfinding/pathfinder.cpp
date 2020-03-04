@@ -12,6 +12,16 @@ Pathfinder::Pathfinder()
     // window.setKeyRepeatEnabled(false);
 }
 
+double Pathfinder::binExp(double a, int t) {
+    double result = 1.0;
+    while ( t ) {
+        if ( t & 1 ) result *= a;
+        a *= a;
+        t /= 2;
+    }
+    return result;
+}
+
 void Pathfinder::draw(Pathfinder::Population pop, int bestIndividualsPrintCnt, bool pauseAfter = false) {
     if ( !window.isOpen() ) return; 
     window.clear(sf::Color::Black); 
@@ -106,7 +116,7 @@ void Pathfinder::draw(Pathfinder::Population pop, int bestIndividualsPrintCnt, b
 }
 
 void Pathfinder::test(Circle & queen, std::vector<Circle>& sites) {
-    int nOfGenerations { 150 };
+    int nOfGenerations { 300 };
 
     while ( window.isOpen() ) {
         Point dest { getRandomPoint() };
@@ -120,7 +130,7 @@ std::vector<Point> Pathfinder::findBestPath(Circle& queen, Point destination, st
     obstacles = sites;
     nOfGenerations += nOfGen();
 
-    wdi = 100 / abs(dest - robot.o);
+    wdi = 100 /  abs(dest - robot.o);
 
     if ( nOfGen() == 0 ) {
         populations.emplace_back(popSize);
@@ -141,7 +151,7 @@ std::vector<Point> Pathfinder::findBestPath(Circle& queen, Point destination, st
     Individual best { populations.back().getBest() };
     // print(populations.back());
 
-    draw(populations.back(), 3, true);
+    draw(populations.back(), popSize/10, true);
 
     /* 
     while ( window.isOpen() ) {
@@ -392,7 +402,11 @@ void Pathfinder::remove(chrom_t& chrom) {
 } 
 
 size_t Pathfinder::smallDelta(size_t z) {
-    return std::uniform_int_distribution<size_t>(0, z)(rng);
+    int x { std::uniform_int_distribution<int>(0, z)(rng) };
+    int t = std::max(size_t(1), nOfGen());
+    size_t ans = ceil(binExp(double(x) / z, t - 1) * x);
+    std::cerr << "[0," << z << "] -> " << ans << "\n";
+    return ans;
 }
 
 size_t Pathfinder::largeDelta(size_t z) {

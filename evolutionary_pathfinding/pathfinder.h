@@ -36,9 +36,9 @@ using fitness_t = double;
 bool local = false;
 const size_t popSize = 100;
 
-double clearParam { 50 };
+double clearParam { 25 };
 // probably uniformed by straight line distance (100 / a->b) 100 is good cost or minus
-double wdi { 0.1 };
+double wdi { 1000 };
 // very small value, has to be multiplayed by strong factor, and probably by nomber of edges
 double wsm { 2000 };
 // ~ queen radius in dense enviroment, need to be multiplied by strong factor if gets throught point
@@ -58,7 +58,7 @@ std::uniform_real_distribution<double> fraction;
 
 std::bernoulli_distribution crossRoll { 0.3 };
 std::bernoulli_distribution swapRoll { 0.01 };
-std::bernoulli_distribution insertRoll { 0.1 };
+std::bernoulli_distribution insertRoll { 0.05 };
 std::bernoulli_distribution removeRoll { 0.05 };
 std::bernoulli_distribution smallMutateRoll { 0.05 };
 std::bernoulli_distribution largeMutateRoll { 0.05 };
@@ -96,9 +96,8 @@ geo::Point dest;
     // Inline functions
     size_t nOfGen() { return populations.size(); }
     size_t getMaxChromLen() { return ( local? nOfGen() : obstacles.size() ); }
-public:
     geo::Point getRandomPoint() { return geo::Point(xDistr(rng), yDistr(rng)); }
-private:
+    double binExp(double a, int t);
 
     // COST METHODS
     fitness_t calcGoodCost(chrom_t& chrom);
